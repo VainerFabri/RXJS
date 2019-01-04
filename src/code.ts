@@ -1,26 +1,21 @@
-import {Observable} from "rxjs";
+import {AsyncSubject} from 'rxjs';
 
-var observable = Observable.create((observer:any)=>{
-    try{
-        observer.next('Hey');
-        observer.next('Hello')
-        setInterval(()=>{
-            observer.next('whats up')
-        },2000)
-    }catch(err){
-        observer.error(err)
-    }
-});
+var subject = new AsyncSubject()
 
-var observer = observable.subscribe(
-    (x:any)=>addItem(x),
-    (error:any)=>addItem(error),
-    ()=>addItem('Completed')
-);
+subject.subscribe(
+    data => addItem('Observer 1: ' + data),
+    ()=>addItem('Observer 1 Completed')
+)
+
+var i = 1;
+var int = setInterval(()=>subject.next(i++),100)
 
 setTimeout(()=>{
-    observer.unsubscribe();
-},6001)
+    var observer2 = subject.subscribe(
+        data => addItem('Observer 2: ' + data)
+    )
+    subject.complete()
+},500);
 
 function addItem(val:any){
     var node = document.createElement("li");
